@@ -17,7 +17,7 @@ stages:
       displayName: Login
  
     - script: |
-        CURIP=$(az vm create -n MyVm -g Azure-Devops-Pipeline-RG --public-ip-address "" --image Ubuntu2204 --vnet-name "Vnet-Host-Runner" --subnet "default" --nsg "RunnerNSG" --admin-password Testing123456! --admin-username testing | jq -r '.privateIpAddress')
+        CURIP=$(az vm create -n MyVm -g Azure-Devops-Pipeline-RG --public-ip-address "" --image Ubuntu2204 --nsg "RunnerNSG" --admin-password Testing123456! --admin-username testing | jq -r '.privateIpAddress')
         sshpass -p "Testing123456!" scp -o StrictHostKeyChecking=accept-new ./WebServer testing@${CURIP}:~
         sshpass -p "Testing123456!" ssh testing@${CURIP} sudo apt update -y
         sshpass -p "Testing123456!" ssh testing@${CURIP} sudo apt install -y python3-pip 
