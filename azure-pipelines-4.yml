@@ -1,0 +1,26 @@
+
+trigger:
+- master
+ 
+resources:
+- repo: self
+ 
+stages:
+- stage: CreateVM
+  displayName: CreateVM
+  jobs:
+  - job: Build
+    displayName: Build
+    pool: default
+    steps:
+    - script: az login --identity
+      displayName: Login
+ 
+    - script: |
+        CURIP=$(az vm create -n MyVm -g Azure-Devops-Pipeline-RG --public-ip-address "" --image Ubuntu2204 --vnet-name Vnet-Host-Runner --subnet default  --nsg "RunnerNSG" --admin-password Testing123456! --admin-username testing | jq -r '.privateIpAddress')
+        sshpass -p "Testing123456!" scp -o StrictHostKeyChecking=accept-new ./WebServer.py testing@${CURIP}:~
+        sshpass -p "Testing123456!" ssh testing@${CURIP} sudo apt update -y
+        sshpass -p "Testing123456!" ssh testing@${CURIP} sudo apt install -y python3-pip 
+        sshpass -p "Testing123456!" ssh testing@${CURIP} pip3 install flask
+        sshpass -p "Testing123456!" ssh testing@${CURIP} nohup python3 my.py > foo.log 2> foo.err < /dev/null &
+      displayName: 'Run a multi-line script'
